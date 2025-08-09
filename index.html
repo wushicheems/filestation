@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武士芝士文件资源共享站</title>
+    <style>
+        body {
+            background-image: url('s.png');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header img {
+            height: 80px;
+            margin-right: 20px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #8B4513;
+            text-shadow: 1px 1px 2px #ccc;
+        }
+        
+        .search-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 2px solid #8B4513;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #8B4513;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #A0522D;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #8B4513;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .footer {
+            margin-top: auto;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="武士芝士logo">
+        <h1>武士芝士文件资源共享站</h1>
+    </div>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="fileInput" placeholder="输入格式: 子目录文件夹名-文件名 (如: documents-report.pdf)">
+            <button onclick="downloadFile()">下载文件</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用说明:</h3>
+            <ul>
+                <li>输入格式: <strong>子目录文件夹名-文件名</strong> (例如: books-novel.docx)</li>
+                <li>如果想下载整个子目录的压缩包，输入: <strong>子目录文件夹名-allof</strong></li>
+                <li>文件将自动开始下载</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer">
+        © 2023 武士芝士文件资源共享站 - 所有资源仅供学习交流使用
+    </div>
+    
+    <script>
+        function downloadFile() {
+            const input = document.getElementById('fileInput').value.trim();
+            if (!input) {
+                alert('请输入要下载的文件名');
+                return;
+            }
+            
+            // 检查输入格式
+            const parts = input.split('-');
+            if (parts.length !== 2 || !parts[0] || !parts[1]) {
+                alert('输入格式不正确，请使用: 子目录文件夹名-文件名');
+                return;
+            }
+            
+            const folder = parts[0];
+            let filename = parts[1];
+            
+            // 处理allof情况
+            if (filename.toLowerCase() === 'allof') {
+                filename = `${folder}.zip`;
+            }
+            
+            // 构建下载URL
+            const downloadUrl = `file/${folder}/${filename}`;
+            
+            // 创建隐藏的a标签触发下载
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // 清空输入框
+            document.getElementById('fileInput').value = '';
+        }
+        
+        // 允许按Enter键触发下载
+        document.getElementById('fileInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                downloadFile();
+            }
+        });
+    </script>
+</body>
+</html>
