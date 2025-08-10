@@ -264,21 +264,17 @@
             
             // 如果是allof，获取并显示密码
             if (isAllof) {
-                try {
-                    // 尝试从password.json加载密码
-                    const response = await fetch('password.json');
-                    if (!response.ok) throw new Error('无法加载password.json');
+                
+                // 尝试从password.json加载密码
+                const response = await fetch('password.json');
+                if (!response.ok) throw new Error('无法加载password.json');
                     
-                    const passwords = await response.json();
-                    const password = passwords[folder] || defaultPasswords[folder] || "未找到密码";
+                const passwords = await response.json();
+                const password = passwords[folder] || defaultPasswords[folder] || "未找到密码";
                     
-                    showPasswordModal(`压缩文件密码为: ${password}`);
-                } catch (error) {
-                    // 如果JSON加载失败，使用默认密码
-                    console.error("密码加载错误:", error);
-                    const password = defaultPasswords[folder] || "未找到密码";
-                    showPasswordModal(`压缩文件密码为: ${password} (从备用数据获取)`);
-                }
+                showPasswordModal(`压缩文件密码为: ${password}`);
+                
+                
             }
             
             // 清空输入框
