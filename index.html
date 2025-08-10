@@ -187,7 +187,7 @@
             <h3>使用说明:</h3>
             <ul>
                 <li>输入格式: <strong>子目录文件夹名-文件名</strong> (例如: books-novel.docx)</li>
-                <li>下载整个子目录: <strong>子目录文件夹名-allof</strong> (如: catmeme-allof)</li>
+                <li>下载整个子目录: <strong>子目录文件夹名-allof</strong> (如: node-allof)</li>
                 <li>压缩包密码将在下载后显示</li>
                 <li>文件将自动开始下载</li>
             </ul>
@@ -212,6 +212,9 @@
     </div>
     
     <script>
+        // 密码映射表 (备用方案，如果password.json加载失败时使用)
+      
+
         function showPasswordModal(message) {
             const modal = document.getElementById('passwordModal');
             const passwordText = document.getElementById('passwordText');
@@ -262,16 +265,19 @@
             // 如果是allof，获取并显示密码
             if (isAllof) {
                 try {
-                    const response = await fetch(`get_password.php?folder=${encodeURIComponent(folder)}`);
+                    // 尝试从password.json加载密码
+                    const response = await fetch('password.json');
+                    if (!response.ok) throw new Error('无法加载password.json');
                     
-                    if (!response.ok) {
-                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
-                    }
+                    const passwords = await response.json();
+                    const password = passwords[folder] || defaultPasswords[folder] || "未找到密码";
                     
-                    const password = await response.text();
-                    showPasswordModal(`压缩文件密码为: ${password.trim()}`);
+                    showPasswordModal(`压缩文件密码为: ${password}`);
                 } catch (error) {
-                    showPasswordModal(`获取密码时出错: ${error.message}`);
+                    // 如果JSON加载失败，使用默认密码
+                    console.error("密码加载错误:", error);
+                    const password = defaultPasswords[folder] || "未找到密码";
+                    showPasswordModal(`压缩文件密码为: ${password} (从备用数据获取)`);
                 }
             }
             
