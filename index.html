@@ -215,9 +215,28 @@
             font-size: 16px;
             margin: 5px;
         }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
+    <div class="loading" id="loading">
+        正在处理中，请稍候...
+    </div>
+
     <div class="header">
         <img src="/filestation/logo.png" alt="武士芝士logo">
         <h1>武士芝士文件资源共享站</h1>
@@ -234,7 +253,7 @@
             <ul>
                 <li>输入格式: <strong>子目录文件夹名-文件名</strong> (例如: books-novel.docx)</li>
                 <li>下载整个子目录: <strong>子目录文件夹名-allof</strong> (如: node-allof)</li>
-                <li>文件无后缀时: 从子目录url.json获取网址并打开 (如: JetBrains-CLion)</li>
+                <li>文件无后缀时: 从子目录url.json获取网址并直接打开 (如: JetBrains-CLion)</li>
                 <li>压缩包密码将在下载后显示</li>
                 <li>文件将自动开始下载</li>
             </ul>
@@ -272,6 +291,14 @@
     
     <script>
         let currentUrl = '';
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
         
         function showPasswordModal(message) {
             const modal = document.getElementById('passwordModal');
@@ -334,6 +361,8 @@
                 isAllof = true;
             }
             
+            showLoading();
+            
             // 检查文件是否有后缀
             if (!hasFileExtension(filename)) {
                 // 没有后缀，尝试从url.json获取网址
@@ -358,13 +387,16 @@
                         throw new Error(`URL不存在: ${filename}`);
                     }
                     
-                    showUrlModal(`找到网址: ${urlData[filename]}`, urlData[filename]);
+                    hideLoading();
+                    // 直接打开网址，不显示模态框
+                    window.open(urlData[filename], '_blank');
                     
                     // 清空输入框
                     document.getElementById('fileInput').value = '';
                     return;
                 } catch (error) {
                     console.error("完整错误:", error);
+                    hideLoading();
                     showUrlModal(`错误: ${error.message}`, '');
                     // 清空输入框
                     document.getElementById('fileInput').value = '';
@@ -372,9 +404,10 @@
                 }
             }
             
+            // 有后缀的文件，进行下载
             // 修正路径：添加/filestation/
             const downloadUrl = `/filestation/file/${folder}/${filename}`;
-            console.log("下载URL:", downloadUrl); // 调试输出
+            console.log("下载URL:", downloadUrl);
             
             // 创建隐藏的a标签触发下载
             const a = document.createElement('a');
@@ -389,30 +422,34 @@
                 try {
                     // 修正路径：添加/filestation/
                     const passwordUrl = `/filestation/password.json?t=${Date.now()}`;
-                    console.log("正在请求密码:", passwordUrl); // 调试输出
+                    console.log("正在请求密码:", passwordUrl);
                     
                     const response = await fetch(passwordUrl);
-                    console.log("响应状态:", response.status); // 调试输出
+                    console.log("响应状态:", response.status);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP错误 ${response.status}`);
                     }
 
                     const text = await response.text();
-                    console.log("原始响应:", text); // 调试输出
+                    console.log("原始响应:", text);
                     
                     const passwords = JSON.parse(text);
-                    console.log("解析结果:", passwords); // 调试输出
+                    console.log("解析结果:", passwords);
                     
                     if (!passwords[folder]) {
                         throw new Error(`密码不存在: ${folder}`);
                     }
                     
+                    hideLoading();
                     showPasswordModal(`压缩文件密码为: ${passwords[folder]}`);
                 } catch (error) {
-                    console.error("完整错误:", error); // 调试输出
+                    console.error("完整错误:", error);
+                    hideLoading();
                     showPasswordModal(`错误: ${error.message}`);
                 }
+            } else {
+                hideLoading();
             }
             
             // 清空输入框
